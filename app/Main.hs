@@ -1,65 +1,58 @@
-{-# LANGUAGE EmptyCase #-}
 data Answer = 
     Digit Int
   | SingleWord String
 
-
 {----------------------------------------------}
 {--------------- EXACT MATCH ------------------}
 {----------------------------------------------}
--- exactMatch :: String -> [String] -> Maybe String
+exactMatch :: String -> [String] -> Maybe String
+exactMatch a xss = if (length (filter (\x -> x /= Nothing) (containedInSentences a xss)) == 1)  
+        then  (filter (\x -> x /= Nothing) (containedInSentences a xss)) !! 0 
+        else Nothing
 
 
-{----------- Here goes your code --------------}
-
-
---   map (\x -> if x == word then ) words xs
-containedInSentence :: String -> [String] -> Bool
-containedInSentence a [] = False
-containedInSentence a  (x:xs)
-    | a == x = True
-    | otherwise = a `elem` xs
 {----------------------------------------------}
 {------ CONTAINED IN JUST ONE SENTENCE --------}
 {----------------------------------------------}
---containedInSentences :: String -> [String] -> [Maybe String]
---containedInSentences word xss = 
- --   map (map () ) xss 
+{- Recursive function to search the answer in options-}
+containedInSentence :: String -> [String] -> Bool
+containedInSentence _ [] = False
+containedInSentence a  (x:xs)
+    | a == x = True
+    | otherwise = a `containedInSentence` xs
 
 
-
-{----------- Here goes your code --------------}
+{----------------------------------------------}
+{------ CONTAINED IN JUST ONE SENTENCE --------}
+{----------------------------------------------}
+containedInSentences :: String -> [String] -> [Maybe String]
+containedInSentences a xss = 
+   map (\ xs -> if containedInSentence a (words xs) then Just xs else Nothing) xss
 
 
 {----------------------------------------------}
 {----------------- MATCH ----------------------}
 {----------------------------------------------}
+match :: Answer -> [String] -> Maybe String
+match  _ [] = Nothing
+match (Digit n) xss = if n < 0 && (length xss) >= n 
+            then Nothing
+        else Just (xss!!(n - 1))
+match (SingleWord a) xss = exactMatch a xss 
 
-
-
-
--- match :: Answer -> [String] -> Maybe String
--- match 
---     | (Digit n) [] = Nothing
---     | (Digit n) xs = case (length xs) < n || n <= 0 of
---         True -> Nothing
---         False -> Just (xs!!(n - 1))
---     |(SingleWord s) [] = Nothing
---     -- (SingleWord s) xs 
-
-{----------- Here goes your code --------------}
-
-
--- ans :: Maybe String
--- ans = match (SingleWord "Hola") ["Hola","Hola mundo"]
 
 options :: [[Char]]
 options = ["1. Hola","2. Hola mundo"]
 
--- ans2 :: Maybe String
--- ans2 = match (Digit 1) options 
+
+ans :: Maybe String
+ans = match (SingleWord "Hola") options
+
+
+ans2 :: Maybe String
+ans2 = match (Digit 2) options 
 
 
 
--- main :: IO () 
--- main = print ans2
+main :: IO () 
+main = print ans
